@@ -1,0 +1,17 @@
+{
+  "name": "ttv-stat-overlay",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-node": "^29.0.0"
+  },
+  "jest": {
+    "transform": {}
+  },
+  "type": "module"
+}

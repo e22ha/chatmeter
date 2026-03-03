@@ -1,0 +1,11 @@
+services:
+  webapp:
+    image: nginx:alpine
+    ports:
+      - "8080:80"          # change to your preferred port
+    volumes:
+      - ./webapp/index.html:/usr/share/nginx/html/index.html:ro
+      - ./webapp:/usr/share/nginx/html/webapp:ro
+      - ./core:/usr/share/nginx/html/core:ro
+      - ./webapp/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped

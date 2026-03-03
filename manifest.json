@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Twitch Chat Stats",
+  "version": "0.1.0",
+  "description": "Real chat engagement stats injected into Twitch.",
+  "content_scripts": [
+    {
+      "matches": ["https://www.twitch.tv/*"],
+      "js": ["core/ChatStatsEngine.js", "extension/content.js"],
+      "css": ["extension/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "wss://irc-ws.chat.twitch.tv/"
+  ]
+}

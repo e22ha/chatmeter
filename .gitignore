@@ -1,0 +1,11 @@
+.claude/
+node_modules/
+dist/
+coverage/
+*.pem
+*.crx
+.env
+.DS_Store
+deploy.sh
+docs/
+docker-compose.yml

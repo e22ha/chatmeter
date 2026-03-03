@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chatmeter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Azeret+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #f5f4f0;
+      --surface:   #ffffff;
+      --border:    #d8d7d2;
+      --text:      #0e0e0e;
+      --muted:     #898984;
+      --speed:     #e8000b;
+      --active:    #1a56e8;
+      --total:     #0e0e0e;
+      --hype-calm: #22c5a0;
+      --hype-mid:  #7c3fe0;
+      --hype-hot:  #f07800;
+      --hype-red:  #e8000b;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+    body { background: var(--bg); color: var(--text); font-family: 'Azeret Mono', monospace; min-height: 100vh }
+
+    /* ── Connect screen ─────────────────────────────────── */
+    .connect-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 0;
+      padding: 0 20px;
+    }
+    .connect-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--speed);
+      margin-bottom: 6px;
+    }
+    .connect-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 100px;
+      line-height: 0.88;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .connect-rule {
+      width: 100%;
+      max-width: 340px;
+      height: 3px;
+      background: var(--speed);
+      margin: 18px 0 16px;
+    }
+    .connect-row { display: flex; gap: 0; width: 100%; max-width: 340px }
+
+    input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-right: none;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Azeret Mono', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: border-color .15s;
+      border-radius: 0;
+    }
+    input:focus { border-color: var(--text) }
+    input::placeholder { color: var(--muted) }
+
+    button.primary {
+      flex-shrink: 0;
+      background: var(--text);
+      border: 1px solid var(--text);
+      color: var(--bg);
+      padding: 11px 22px;
+      cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      transition: background .15s, border-color .15s;
+      border-radius: 0;
+    }
+    button.primary:hover { background: var(--speed); border-color: var(--speed) }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 12px;
+      cursor: pointer;
+      font-family: 'Azeret Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: border-color .15s, color .15s;
+      border-radius: 0;
+    }
+    button.ghost:hover { border-color: var(--text); color: var(--text) }
+
+    /* ── App shell ──────────────────────────────────────── */
+    #app { display: none; height: 100vh; flex-direction: column }
+    #app.visible { display: flex }
+
+    .app-header {
+      border-top: 3px solid var(--speed);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .hdr {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 9px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .live-indicator { display: flex; align-items: center; gap: 6px; flex-shrink: 0 }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--speed);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.15 } }
+    .live-label { font-size: 10px; letter-spacing: 0.14em; color: var(--speed); font-weight: 600; text-transform: uppercase }
+    .header-div { color: var(--border); font-size: 18px }
+    .channel-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.04em }
+    .session-timer { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums }
+    .header-disconnect { margin-left: auto }
+
+    /* Body */
+    .body-outer { flex: 1; min-height: 0; overflow: hidden; display: flex; justify-content: center }
+    .app-body { display: flex; width: 100%; max-width: 960px; min-height: 0 }
+    .stats-col { flex: 1; min-width: 0; overflow-y: auto; padding: 22px 20px }
+    .chat-col {
+      width: 220px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+    }
+
+    /* ── Hero ───────────────────────────────────────────── */
+    .hero { margin-bottom: 24px; padding-left: 16px; border-left: 4px solid var(--speed) }
+    .hero-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--speed);
+    }
+    .hero-speed-row { display: flex; align-items: baseline; gap: 8px; line-height: 1 }
+    .hero-speed-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 100px;
+      line-height: 0.9;
+      color: var(--speed);
+      letter-spacing: 0.01em;
+    }
+    .hero-speed-unit {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .hype-bar-wrap { margin: 10px 0 18px; height: 4px; background: var(--border) }
+    .hype-bar { height: 100%; width: 100%; transition: background 0.6s ease }
+    .hype-bar.l1 { background: var(--hype-calm) }
+    .hype-bar.l2 { background: var(--hype-mid) }
+    .hype-bar.l3 { background: var(--hype-hot) }
+    .hype-bar.l4 { background: var(--hype-red) }
+
+    .hero-sub { display: flex; gap: 36px }
+    .hero-sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted) }
+    .hero-sub-value { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; letter-spacing: 0.02em }
+    .hero-sub-value.c-active { color: var(--active) }
+    .hero-sub-value.c-total  { color: var(--total) }
+
+    /* ── Charts ─────────────────────────────────────────── */
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 14px 10px;
+      position: relative;
+    }
+    .chart-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    canvas { display: block; width: 100%; height: 58px; cursor: crosshair }
+
+    /* ── Cards ──────────────────────────────────────────── */
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px }
+    .card { background: var(--surface); border: 1px solid var(--border); padding: 12px 14px }
+    .card-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 4px }
+    .card-value { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 0.02em; color: var(--text) }
+    .card-sub { font-size: 10px; color: var(--muted); margin-top: 2px }
+
+    /* ── Top chatters ───────────────────────────────────── */
+    /* ── Top chatters ─────────────────────────────────── */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted) }
+    .section-header .section-label { margin-bottom: 0 }
+    .search-input {
+      flex: unset;
+      width: 120px;
+      border: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-family: 'Azeret Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      outline: none;
+      transition: border-color .15s;
+      border-radius: 0;
+    }
+    .search-input:focus { border-color: var(--text) }
+    .search-input::placeholder { color: var(--muted) }
+
+    .top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    .top-list::-webkit-scrollbar { width: 3px }
+    .top-list::-webkit-scrollbar-track { background: transparent }
+    .top-list::-webkit-scrollbar-thumb { background: var(--border) }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 10px;
+      background: var(--surface);
+      border: 1px solid transparent;
+      transition: border-color .2s;
+    }
+    .top-row:hover { border-color: var(--border) }
+    .top-row-name { font-size: 12px }
+    .top-row-count { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--speed) }
+
+    /* ── Bot filter ───────────────────────────────────── */
+    .bot-controls { margin-top: 14px }
+    #toggle-bots.active { border-color: var(--speed); color: var(--speed) }
+    .bot-panel {
+      margin-top: 8px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .bot-panel-row { display: flex; margin-bottom: 8px }
+    .bot-panel-row .search-input { flex: 1; border-right: none }
+    .bot-tag-list { display: flex; flex-wrap: wrap; gap: 4px }
+    .bot-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-family: 'Azeret Mono', monospace;
+      font-size: 10px;
+      padding: 2px 6px;
+    }
+    .bot-tag-remove {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+      line-height: 1;
+      font-family: inherit;
+    }
+    .bot-tag-remove:hover { color: var(--speed) }
+
+    /* ── Chat ───────────────────────────────────────────── */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-header-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted) }
+    .chat-feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .chat-feed::-webkit-scrollbar { width: 3px }
+    .chat-feed::-webkit-scrollbar-track { background: transparent }
+    .chat-feed::-webkit-scrollbar-thumb { background: var(--border) }
+    .chat-msg { font-size: 11px; line-height: 1.5; word-break: break-word }
+    .chat-user { font-weight: 600; color: var(--speed); margin-right: 4px }
+    .chat-text { color: var(--muted) }
+
+    /* ── Tooltip ────────────────────────────────────────── */
+    #chart-tooltip {
+      position: fixed;
+      background: var(--text);
+      color: var(--bg);
+      font-family: 'Azeret Mono', monospace;
+      font-size: 11px;
+      padding: 5px 10px;
+      pointer-events: none;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #chart-tooltip[hidden] { display: none }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 680px) {
+      #app { height: auto; min-height: 100dvh }
+      .body-outer { overflow: visible; display: block }
+      .app-body { flex-direction: column }
+      .stats-col { overflow-y: visible; padding: 16px }
+      .chat-col { width: 100%; border-left: none; border-top: 1px solid var(--border); height: 280px; flex-shrink: 0 }
+      .hero-speed-value { font-size: 76px }
+      .connect-title { font-size: 68px }
+      .cards { grid-template-columns: repeat(2, 1fr) }
+      .charts-row { grid-template-columns: 1fr }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="connect-screen" id="connect-screen">
+    <div class="connect-eyebrow">live chat analytics</div>
+    <div class="connect-title">Chatmeter</div>
+    <div class="connect-rule"></div>
+    <div class="connect-row">
+      <input id="channel-input" placeholder="channel name" autocomplete="off" />
+      <button class="primary" id="connect-btn">Connect</button>
+    </div>
+  </div>
+
+  <div id="app">
+    <header class="app-header">
+      <div class="hdr">
+        <div class="live-indicator">
+          <div class="live-dot"></div>
+          <span class="live-label">live</span>
+        </div>
+        <span class="header-div">/</span>
+        <span class="channel-name" id="channel-name"></span>
+        <span class="session-timer" id="session-timer">0:00</span>
+        <button class="ghost header-disconnect" id="disconnect-btn">disconnect</button>
+      </div>
+    </header>
+
+    <div class="body-outer">
+      <div class="app-body">
+        <div class="stats-col">
+
+          <div class="hero">
+            <div class="hero-label">speed</div>
+            <div class="hero-speed-row">
+              <span class="hero-speed-value" id="c-speed">0</span>
+              <span class="hero-speed-unit">msg/min</span>
+            </div>
+            <div class="hype-bar-wrap"><div class="hype-bar l1" id="hype-bar"></div></div>
+            <div class="hero-sub">
+              <div>
+                <div class="hero-sub-label">active (5m)</div>
+                <div class="hero-sub-value c-active" id="c-active">0</div>
+              </div>
+              <div>
+                <div class="hero-sub-label">total msgs</div>
+                <div class="hero-sub-value c-total" id="c-total">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-label">speed history</div>
+              <canvas id="chart-speed" height="58"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-label">active chatters</div>
+              <canvas id="chart-active" height="58"></canvas>
+            </div>
+          </div>
+
+          <div class="cards">
+            <div class="card">
+              <div class="card-label">unique</div>
+              <div class="card-value" id="c-unique">0</div>
+            </div>
+            <div class="card">
+              <div class="card-label">engaged</div>
+              <div class="card-value" id="c-engaged">0</div>
+              <div class="card-sub">≥3 msgs</div>
+            </div>
+            <div class="card">
+              <div class="card-label">peak</div>
+              <div class="card-value" id="c-peak">0</div>
+              <div class="card-sub">msg/min</div>
+            </div>
+            <div class="card">
+              <div class="card-label">commands</div>
+              <div class="card-value" id="c-cmds">0%</div>
+            </div>
+            <div class="card">
+              <div class="card-label">emote-only</div>
+              <div class="card-value" id="c-emotes">0%</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <span class="section-label">top chatters</span>
+            <input id="chatter-search" class="search-input" placeholder="search..." autocomplete="off" />
+          </div>
+          <div class="top-list" id="top-rows"></div>
+
+          <div class="bot-controls">
+            <button class="ghost" id="toggle-bots">bots: on</button>
+            <div class="bot-panel">
+              <div class="bot-panel-row">
+                <input id="custom-bot-input" class="search-input" placeholder="add bot username..." autocomplete="off" />
+                <button class="ghost" id="add-bot-btn">add</button>
+              </div>
+              <div class="bot-tag-list" id="custom-bot-tags"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="chat-col">
+          <div class="chat-header">
+            <span class="chat-header-label">live chat</span>
+            <button class="ghost" id="toggle-chat">hide</button>
+          </div>
+          <div class="chat-feed" id="chat-feed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="chart-tooltip" hidden></div>
+
+  <!-- RELATIVE paths — required for /chatmeter/ sub-path proxying on server -->
+  <script src="core/ChatStatsEngine.js"></script>
+  <script type="module" src="webapp/app.js"></script>
+</body>
+</html>
