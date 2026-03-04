@@ -1,2 +1,25 @@
 [tools]
 node = "latest"
+
+[tasks.install]
+run = "npm install"
+description = "Install dev dependencies"
+
+[tasks.test]
+run = "node --experimental-vm-modules node_modules/.bin/jest"
+description = "Run tests once"
+
+[tasks."test:watch"]
+run = "node --experimental-vm-modules node_modules/.bin/jest --watch"
+description = "Run tests in watch mode"
+
+[tasks.serve]
+run = """
+[ -f docker-compose.yml ] || cp docker-compose.example.yml docker-compose.yml
+docker compose up -d
+"""
+description = "Start web app via Docker (copies example config on first run)"
+
+[tasks.stop]
+run = "docker compose down"
+description = "Stop web app"
