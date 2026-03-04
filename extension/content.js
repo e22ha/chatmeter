@@ -38,6 +38,7 @@ let engine = null
 let badge = null
 let popover = null
 let pendingInitObserver = null
+let hideTimeout = null
 
 function getChannel() {
   // Mod view: /moderator/<channel>
@@ -46,6 +47,40 @@ function getChannel() {
   // Regular stream: /<channel>
   const match = location.pathname.match(/^\/([^/]+)/)
   return match ? match[1].toLowerCase() : null
+}
+
+function positionPopover() {
+  if (!badge || !popover) return
+  const rect = badge.getBoundingClientRect()
+  const spaceAbove = rect.top
+  const spaceBelow = window.innerHeight - rect.bottom
+  const popH = popover.offsetHeight
+
+  if (spaceAbove >= popH + 12 || spaceAbove >= spaceBelow) {
+    // show above
+    popover.style.top = 'auto'
+    popover.style.bottom = (window.innerHeight - rect.top + 10) + 'px'
+  } else {
+    // show below
+    popover.style.bottom = 'auto'
+    popover.style.top = (rect.bottom + 10) + 'px'
+  }
+
+  // Clamp horizontally so popover doesn't go off-screen
+  let left = rect.left
+  if (left + 360 > window.innerWidth - 10) left = window.innerWidth - 370
+  if (left < 10) left = 10
+  popover.style.left = left + 'px'
+}
+
+function showPopover() {
+  clearTimeout(hideTimeout)
+  popover.hidden = false
+  positionPopover()
+}
+
+function hidePopover() {
+  hideTimeout = setTimeout(() => { popover.hidden = true }, 80)
 }
 
 function createBadge() {
@@ -57,13 +92,19 @@ function createBadge() {
       <span class="ttv-stats-speed">⚡ –/м</span>
       <span class="ttv-stats-active">👥 –</span>
     </span>
-    <div class="ttv-stats-popover" hidden></div>
   `
   badge = wrap.querySelector('.ttv-stats-pill')
-  popover = wrap.querySelector('.ttv-stats-popover')
 
-  wrap.addEventListener('mouseenter', () => { popover.hidden = false })
-  wrap.addEventListener('mouseleave', () => { popover.hidden = true })
+  // Popover lives on document.body to escape all Twitch stacking contexts
+  popover = document.createElement('div')
+  popover.className = 'ttv-stats-popover'
+  popover.hidden = true
+  document.body.appendChild(popover)
+
+  wrap.addEventListener('mouseenter', showPopover)
+  wrap.addEventListener('mouseleave', hidePopover)
+  popover.addEventListener('mouseenter', () => clearTimeout(hideTimeout))
+  popover.addEventListener('mouseleave', hidePopover)
 
   return wrap
 }
@@ -106,7 +147,6 @@ function updatePopover(s) {
       <div class="ttv-pop-meta-item"><span>Peak</span><span>${s.peakMsgsPerMin}/min</span></div>
       <div class="ttv-pop-meta-item"><span>Commands</span><span>${(s.commandRatio * 100).toFixed(0)}%</span></div>
       <div class="ttv-pop-meta-item"><span>Emote-only</span><span>${(s.emoteOnlyRatio * 100).toFixed(0)}%</span></div>
-      <div class="ttv-pop-meta-item"><span>New</span><span>${s.newChatters}</span></div>
     </div>
     <div class="ttv-pop-sep"></div>
     <div class="ttv-pop-top-hdr">Top Chatters</div>
@@ -184,8 +224,9 @@ new MutationObserver(() => {
     lastPath = location.pathname
     const old = document.getElementById(BADGE_ID)
     if (old) old.remove()
+    if (popover) { popover.remove(); popover = null }
+    clearTimeout(hideTimeout)
     badge = null
-    popover = null
     if (engine) {
       engine.stop()
       engine = null

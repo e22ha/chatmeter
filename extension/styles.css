@@ -2,7 +2,6 @@
 #ttv-chat-stats-badge {
   display: inline-flex;
   align-items: center;
-  position: relative;
   margin-left: 8px;
   vertical-align: middle;
 }
@@ -27,10 +26,8 @@
 
 /* ── Popup ──────────────────────────────────────────────── */
 .ttv-stats-popover {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 0;
-  z-index: 99999;
+  position: fixed;
+  z-index: 2147483647;
   width: 360px;
   background: rgba(10, 10, 17, 0.90);
   backdrop-filter: blur(28px) saturate(160%);
