@@ -1,3 +1,18 @@
+/* chatmeter-data dark palette — applied to extension overlay on Twitch */
+:root {
+  --cm-bg:      #0e0e10;
+  --cm-surf:    #18181b;
+  --cm-surf2:   #1f1f23;
+  --cm-border:  #2a2a30;
+  --cm-border2: #3a3a44;
+  --cm-text:    #c8c8cc;
+  --cm-dim:     #6b6b78;
+  --cm-bright:  #f0f0f5;
+  --cm-red:     #ff2233;
+  --cm-blue:    #5090ff;
+  --cm-amber:   #f08800;
+}
+
 /* ── Badge pill ─────────────────────────────────────────── */
 #ttv-chat-stats-badge {
   display: inline-flex;
@@ -10,12 +25,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
+  font-family: 'Azeret Mono', ui-monospace, 'SF Mono', monospace;
   color: #efeff1;
   cursor: default;
   white-space: nowrap;
   user-select: none;
   margin-right: 6px;
+  letter-spacing: 0.04em;
 }
 
 .ttv-stats-msgs,
@@ -28,21 +45,16 @@
 .ttv-stats-popover {
   position: fixed;
   z-index: 2147483647;
-  width: 360px;
-  background: rgba(10, 10, 17, 0.90);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
+  width: 340px;
+  background: var(--cm-surf);
+  border: 1px solid var(--cm-border);
+  border-top: 3px solid var(--cm-red);
   overflow: hidden;
-  color: #d8d8e4;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  color: var(--cm-text);
+  font-family: 'Azeret Mono', ui-monospace, 'SF Mono', monospace;
   font-size: 12px;
   line-height: 1.4;
-  box-shadow:
-    0 -4px 40px rgba(0, 0, 0, 0.55),
-    0 2px 12px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
 }
 
@@ -50,30 +62,33 @@
   padding: 10px 16px 8px;
   display: flex;
   align-items: center;
+  border-bottom: 1px solid var(--cm-border);
 }
 
 .ttv-pop-title {
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: #9147ff;
+  color: var(--cm-dim);
 }
 
 .ttv-pop-sep {
   height: 1px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--cm-border);
 }
 
 /* ── Hero numbers ───────────────────────────────────────── */
 .ttv-pop-hero {
   display: grid;
   grid-template-columns: 1fr 1px 1fr 1px 1fr;
-  padding: 12px 0;
+  padding: 14px 0;
+  background: var(--cm-surf2);
+  border-bottom: 1px solid var(--cm-border);
 }
 
 .ttv-pop-hero-div {
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--cm-border);
   height: 36px;
   align-self: center;
 }
@@ -84,60 +99,72 @@
 }
 
 .ttv-pop-hero-val {
-  font-size: 28px;
-  font-weight: 700;
+  font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+  font-size: 32px;
+  font-weight: 400;
   line-height: 1;
-  letter-spacing: -0.02em;
-  color: #ffffff;
+  letter-spacing: 0.04em;
+  color: var(--cm-bright);
   font-variant-numeric: tabular-nums;
 }
 
-.ttv-c-speed  { color: #ff5e7a }
-.ttv-c-active { color: #48cfe0 }
+.ttv-c-speed  { color: var(--cm-red) }
+.ttv-c-active { color: var(--cm-blue) }
 
 .ttv-pop-hero-lab {
   font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #5a5a72;
+  letter-spacing: 0.14em;
+  color: var(--cm-dim);
   margin-top: 5px;
+  font-weight: 600;
 }
 
 /* ── Meta grid ──────────────────────────────────────────── */
 .ttv-pop-meta {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 0;
-  padding: 12px 16px 14px;
+  gap: 0;
+  background: var(--cm-border);
+  border-bottom: 1px solid var(--cm-border);
 }
 
 .ttv-pop-meta-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  padding: 10px 14px;
+  background: var(--cm-surf);
+}
+
+.ttv-pop-meta-item + .ttv-pop-meta-item {
+  border-left: 1px solid var(--cm-border);
 }
 
 .ttv-pop-meta-item span:first-child {
   font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #5a5a72;
+  letter-spacing: 0.12em;
+  color: var(--cm-dim);
+  font-weight: 600;
 }
 
 .ttv-pop-meta-item span:last-child {
-  font-size: 14px;
-  font-weight: 600;
-  color: #e4e4f0;
+  font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--cm-bright);
   font-variant-numeric: tabular-nums;
 }
 
 /* ── Top chatters ───────────────────────────────────────── */
 .ttv-pop-top-hdr {
   font-size: 9px;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: #5a5a72;
+  color: var(--cm-dim);
   padding: 10px 16px 6px;
 }
 
@@ -146,33 +173,34 @@
   grid-template-columns: 20px 1fr auto;
   align-items: center;
   gap: 6px;
-  padding: 4px 16px;
+  padding: 5px 16px;
+  border-bottom: 1px solid var(--cm-border);
 }
 
-.ttv-top-row:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.025);
-}
+.ttv-top-row:last-child { border-bottom: none }
 
 .ttv-top-rank {
   font-size: 10px;
-  color: #42425a;
+  color: var(--cm-dim);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
 .ttv-top-name {
   font-size: 12px;
-  color: #c0c0d0;
+  color: var(--cm-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .ttv-top-count {
-  font-size: 12px;
-  font-weight: 700;
-  color: #9147ff;
+  font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--cm-red);
   font-variant-numeric: tabular-nums;
 }
 
-.ttv-pop-footer { height: 10px }
+.ttv-pop-footer { height: 10px; background: var(--cm-surf2); border-top: 1px solid var(--cm-border); }

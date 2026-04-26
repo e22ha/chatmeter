@@ -4,29 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Chatmeter</title>
+  <script>
+    (function() {
+      var t = localStorage.getItem('cm_theme') || 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Azeret+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:        #f5f4f0;
-      --surface:   #ffffff;
-      --border:    #d8d7d2;
-      --text:      #0e0e0e;
-      --muted:     #898984;
-      --speed:     #e8000b;
-      --active:    #1a56e8;
-      --total:     #0e0e0e;
+      --bg:      #f5f4f0;
+      --surf:    #ffffff;
+      --surf2:   #faf9f6;
+      --border:  #d8d7d2;
+      --border2: #c0bfba;
+      --text:    #3a3a38;
+      --dim:     #898984;
+      --bright:  #0e0e0e;
+      --red:     #e8000b;
+      --blue:    #1a56e8;
+      --speed:   #e8000b;
+      --active:  #1a56e8;
+      --total:   #0e0e0e;
       --hype-calm: #22c5a0;
       --hype-mid:  #7c3fe0;
       --hype-hot:  #f07800;
       --hype-red:  #e8000b;
     }
+
+    [data-theme="dark"] {
+      --bg:      #0e0e10;
+      --surf:    #18181b;
+      --surf2:   #1f1f23;
+      --border:  #2a2a30;
+      --border2: #3a3a44;
+      --text:    #c8c8cc;
+      --dim:     #6b6b78;
+      --bright:  #f0f0f5;
+      --red:     #ff2233;
+      --blue:    #5090ff;
+      --speed:   #ff2233;
+      --active:  #5090ff;
+      --total:   #f0f0f5;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
-    body { background: var(--bg); color: var(--text); font-family: 'Azeret Mono', monospace; min-height: 100vh }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Azeret Mono', monospace;
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
 
     /* ── Connect screen ─────────────────────────────────── */
     .connect-screen {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -39,7 +74,7 @@
       font-size: 10px;
       letter-spacing: 0.24em;
       text-transform: uppercase;
-      color: var(--speed);
+      color: var(--red);
       margin-bottom: 6px;
     }
     .connect-title {
@@ -47,20 +82,20 @@
       font-size: 100px;
       line-height: 0.88;
       letter-spacing: 0.02em;
-      color: var(--text);
+      color: var(--bright);
     }
     .connect-rule {
       width: 100%;
       max-width: 340px;
       height: 3px;
-      background: var(--speed);
+      background: var(--red);
       margin: 18px 0 16px;
     }
     .connect-row { display: flex; gap: 0; width: 100%; max-width: 340px }
 
     input {
       flex: 1;
-      background: var(--surface);
+      background: var(--surf);
       border: 1px solid var(--border);
       border-right: none;
       padding: 11px 14px;
@@ -68,16 +103,16 @@
       font-family: 'Azeret Mono', monospace;
       font-size: 12px;
       outline: none;
-      transition: border-color .15s;
+      transition: border-color .15s, background 0.2s, color 0.2s;
       border-radius: 0;
     }
-    input:focus { border-color: var(--text) }
-    input::placeholder { color: var(--muted) }
+    input:focus { border-color: var(--bright) }
+    input::placeholder { color: var(--dim) }
 
     button.primary {
       flex-shrink: 0;
-      background: var(--text);
-      border: 1px solid var(--text);
+      background: var(--bright);
+      border: 1px solid var(--bright);
       color: var(--bg);
       padding: 11px 22px;
       cursor: pointer;
@@ -87,12 +122,12 @@
       transition: background .15s, border-color .15s;
       border-radius: 0;
     }
-    button.primary:hover { background: var(--speed); border-color: var(--speed) }
+    button.primary:hover { background: var(--red); border-color: var(--red) }
 
     button.ghost {
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--muted);
+      color: var(--dim);
       padding: 4px 12px;
       cursor: pointer;
       font-family: 'Azeret Mono', monospace;
@@ -102,17 +137,33 @@
       transition: border-color .15s, color .15s;
       border-radius: 0;
     }
-    button.ghost:hover { border-color: var(--text); color: var(--text) }
+    button.ghost:hover { border-color: var(--bright); color: var(--bright) }
+
+    /* ── Theme toggle ───────────────────────────────────── */
+    .theme-btn {
+      -webkit-appearance: none; appearance: none;
+      background: none; border: none; outline: none;
+      cursor: pointer; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px;
+      color: var(--dim);
+      font-size: 1rem;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .theme-btn:hover { color: var(--bright); }
+    .connect-theme { position: absolute; top: 20px; right: 20px; }
 
     /* ── App shell ──────────────────────────────────────── */
     #app { display: none; height: 100vh; flex-direction: column }
     #app.visible { display: flex }
 
     .app-header {
-      border-top: 3px solid var(--speed);
+      border-top: 3px solid var(--red);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
-      background: var(--surface);
+      background: var(--surf);
+      transition: background 0.2s, border-color 0.2s;
     }
     .hdr {
       max-width: 960px;
@@ -125,15 +176,15 @@
     .live-indicator { display: flex; align-items: center; gap: 6px; flex-shrink: 0 }
     .live-dot {
       width: 6px; height: 6px;
-      background: var(--speed);
+      background: var(--red);
       border-radius: 50%;
       animation: pulse 1.8s ease-in-out infinite;
     }
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.15 } }
-    .live-label { font-size: 10px; letter-spacing: 0.14em; color: var(--speed); font-weight: 600; text-transform: uppercase }
+    .live-label { font-size: 10px; letter-spacing: 0.14em; color: var(--red); font-weight: 600; text-transform: uppercase }
     .header-div { color: var(--border); font-size: 18px }
-    .channel-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.04em }
-    .session-timer { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums }
+    .channel-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.04em; color: var(--bright) }
+    .session-timer { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums }
     .header-disconnect { margin-left: auto }
 
     /* Body */
@@ -146,29 +197,30 @@
       border-left: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      background: var(--surface);
+      background: var(--surf);
+      transition: background 0.2s, border-color 0.2s;
     }
 
     /* ── Hero ───────────────────────────────────────────── */
-    .hero { margin-bottom: 24px; padding-left: 16px; border-left: 4px solid var(--speed) }
+    .hero { margin-bottom: 24px; padding-left: 16px; border-left: 4px solid var(--red) }
     .hero-label {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.2em;
-      color: var(--speed);
+      color: var(--red);
     }
     .hero-speed-row { display: flex; align-items: baseline; gap: 8px; line-height: 1 }
     .hero-speed-value {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 100px;
       line-height: 0.9;
-      color: var(--speed);
+      color: var(--red);
       letter-spacing: 0.01em;
     }
     .hero-speed-unit {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 20px;
-      color: var(--muted);
+      color: var(--dim);
       letter-spacing: 0.04em;
     }
     .hype-bar-wrap { margin: 10px 0 18px; height: 4px; background: var(--border) }
@@ -179,7 +231,7 @@
     .hype-bar.l4 { background: var(--hype-red) }
 
     .hero-sub { display: flex; gap: 36px }
-    .hero-sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted) }
+    .hero-sub-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--dim) }
     .hero-sub-value { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; letter-spacing: 0.02em }
     .hero-sub-value.c-active { color: var(--active) }
     .hero-sub-value.c-total  { color: var(--total) }
@@ -187,28 +239,33 @@
     /* ── Charts ─────────────────────────────────────────── */
     .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px }
     .chart-card {
-      background: var(--surface);
+      background: var(--surf);
       border: 1px solid var(--border);
       padding: 12px 14px 10px;
       position: relative;
+      transition: background 0.2s, border-color 0.2s;
     }
     .chart-label {
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.18em;
-      color: var(--muted);
+      color: var(--dim);
       margin-bottom: 8px;
     }
     canvas { display: block; width: 100%; height: 58px; cursor: crosshair }
 
     /* ── Cards ──────────────────────────────────────────── */
     .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px }
-    .card { background: var(--surface); border: 1px solid var(--border); padding: 12px 14px }
-    .card-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-bottom: 4px }
-    .card-value { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 0.02em; color: var(--text) }
-    .card-sub { font-size: 10px; color: var(--muted); margin-top: 2px }
+    .card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .card-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--dim); margin-bottom: 4px }
+    .card-value { font-family: 'Bebas Neue', sans-serif; font-size: 30px; letter-spacing: 0.02em; color: var(--bright) }
+    .card-sub { font-size: 10px; color: var(--dim); margin-top: 2px }
 
-    /* ── Top chatters ───────────────────────────────────── */
     /* ── Top chatters ─────────────────────────────────── */
     .section-header {
       display: flex;
@@ -216,7 +273,7 @@
       align-items: center;
       margin-bottom: 8px;
     }
-    .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted) }
+    .section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--dim) }
     .section-header .section-label { margin-bottom: 0 }
     .search-input {
       flex: unset;
@@ -229,11 +286,11 @@
       font-size: 10px;
       padding: 3px 8px;
       outline: none;
-      transition: border-color .15s;
+      transition: border-color .15s, background 0.2s, color 0.2s;
       border-radius: 0;
     }
-    .search-input:focus { border-color: var(--text) }
-    .search-input::placeholder { color: var(--muted) }
+    .search-input:focus { border-color: var(--bright) }
+    .search-input::placeholder { color: var(--dim) }
 
     .top-list {
       display: flex;
@@ -250,22 +307,23 @@
       justify-content: space-between;
       align-items: center;
       padding: 7px 10px;
-      background: var(--surface);
+      background: var(--surf);
       border: 1px solid transparent;
-      transition: border-color .2s;
+      transition: border-color .2s, background 0.2s;
     }
     .top-row:hover { border-color: var(--border) }
-    .top-row-name { font-size: 12px }
-    .top-row-count { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--speed) }
+    .top-row-name { font-size: 12px; color: var(--text) }
+    .top-row-count { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--red) }
 
     /* ── Bot filter ───────────────────────────────────── */
     .bot-controls { margin-top: 14px }
-    #toggle-bots.active { border-color: var(--speed); color: var(--speed) }
+    #toggle-bots.active { border-color: var(--red); color: var(--red) }
     .bot-panel {
       margin-top: 8px;
       padding: 10px;
-      background: var(--surface);
+      background: var(--surf);
       border: 1px solid var(--border);
+      transition: background 0.2s, border-color 0.2s;
     }
     .bot-panel-row { display: flex; margin-bottom: 8px }
     .bot-panel-row .search-input { flex: 1; border-right: none }
@@ -283,14 +341,14 @@
     .bot-tag-remove {
       background: none;
       border: none;
-      color: var(--muted);
+      color: var(--dim);
       cursor: pointer;
       font-size: 12px;
       padding: 0;
       line-height: 1;
       font-family: inherit;
     }
-    .bot-tag-remove:hover { color: var(--speed) }
+    .bot-tag-remove:hover { color: var(--red) }
 
     /* ── Chat ───────────────────────────────────────────── */
     .chat-header {
@@ -301,7 +359,7 @@
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .chat-header-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted) }
+    .chat-header-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--dim) }
     .chat-feed {
       flex: 1;
       overflow-y: auto;
@@ -314,13 +372,13 @@
     .chat-feed::-webkit-scrollbar-track { background: transparent }
     .chat-feed::-webkit-scrollbar-thumb { background: var(--border) }
     .chat-msg { font-size: 11px; line-height: 1.5; word-break: break-word }
-    .chat-user { font-weight: 600; color: var(--speed); margin-right: 4px }
-    .chat-text { color: var(--muted) }
+    .chat-user { font-weight: 600; color: var(--red); margin-right: 4px }
+    .chat-text { color: var(--dim) }
 
     /* ── Tooltip ────────────────────────────────────────── */
     #chart-tooltip {
       position: fixed;
-      background: var(--text);
+      background: var(--bright);
       color: var(--bg);
       font-family: 'Azeret Mono', monospace;
       font-size: 11px;
@@ -348,6 +406,7 @@
 <body>
 
   <div class="connect-screen" id="connect-screen">
+    <button class="theme-btn connect-theme" onclick="toggleTheme()" aria-label="Toggle theme">&#9681;</button>
     <div class="connect-eyebrow">live chat analytics</div>
     <div class="connect-title">Chatmeter</div>
     <div class="connect-rule"></div>
@@ -368,6 +427,7 @@
         <span class="channel-name" id="channel-name"></span>
         <span class="session-timer" id="session-timer">0:00</span>
         <button class="ghost header-disconnect" id="disconnect-btn">disconnect</button>
+        <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">&#9681;</button>
       </div>
     </header>
 
@@ -413,7 +473,7 @@
             <div class="card">
               <div class="card-label">engaged</div>
               <div class="card-value" id="c-engaged">0</div>
-              <div class="card-sub">≥3 msgs</div>
+              <div class="card-sub">&#8805;3 msgs</div>
             </div>
             <div class="card">
               <div class="card-label">peak</div>
@@ -461,6 +521,15 @@
   </div>
 
   <div id="chart-tooltip" hidden></div>
+
+  <script>
+    function toggleTheme() {
+      var t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = t;
+      localStorage.setItem('cm_theme', t);
+      window.dispatchEvent(new Event('themechange'));
+    }
+  </script>
 
   <!-- RELATIVE paths — required for /chatmeter/ sub-path proxying on server -->
   <script src="core/ChatStatsEngine.js"></script>

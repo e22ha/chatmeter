@@ -91,6 +91,10 @@ window.addEventListener('resize', () => {
   if (lastStats) { drawSpeedChart(); drawActiveChart() }
 })
 
+window.addEventListener('themechange', () => {
+  if (lastStats) { drawSpeedChart(); drawActiveChart() }
+})
+
 // Render persisted custom bots on load
 renderCustomBotTags()
 
@@ -205,7 +209,7 @@ function renderTopList(topChatters) {
   const count = engine ? engine.getChatterCount(searchQuery) : 0
   $('top-rows').innerHTML = count > 0
     ? `<div class="top-row"><span class="top-row-name">${escHtml(searchQuery)}</span><span class="top-row-count">${count}</span></div>`
-    : `<div class="top-row"><span class="top-row-name" style="color:var(--muted)">${escHtml(searchQuery)}</span><span class="top-row-count" style="color:var(--muted)">0</span></div>`
+    : `<div class="top-row"><span class="top-row-name" style="color:var(--dim)">${escHtml(searchQuery)}</span><span class="top-row-count" style="color:var(--dim)">0</span></div>`
 }
 
 function updateHype(current) {
